@@ -1,5 +1,4 @@
 fastapi
 uvicorn
 httpx
-google-cloud-firestore
-google-auth
+firebase-admin
