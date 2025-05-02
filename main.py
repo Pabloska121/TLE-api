@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import json
 from tle_fetcher import download_tles  # Importamos la función asincrónica desde tle_fetcher
 from pathlib import Path
+from firebase_config import get_firestore_client
 
 app = FastAPI()
+db = get_firestore_client()
 DATA_FILE = Path("tle_data.json")
 
 # Cargar datos al iniciar
@@ -36,7 +38,7 @@ async def get_tle_by_name(object_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error buscando el TLE: {e}")
 
-@app.get("/tle/{id}")
+@app.get("/tle-id/{id}")
 def get_tle_by_id(id: str):
     for sat in tle_data:
         if sat["id"] == id:
