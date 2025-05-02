@@ -1,15 +1,11 @@
 import os
 import json
 from firebase_admin import credentials, firestore, initialize_app
+import firebase_admin
 
-# Obtener las credenciales de Firebase desde la variable de entorno
-firebase_credentials = json.loads(os.getenv("FIREBASE_CREDENTIALS_JSON"))
-
-# Crear las credenciales de Firebase a partir de las variables de entorno
-cred = credentials.Certificate(firebase_credentials)
-
-# Inicializar la aplicación de Firebase
-initialize_app(cred)
-
-# Crear una referencia a Firestore
-db = firestore.client()
+def get_firestore_client():
+    if not firebase_admin._apps:
+        firebase_credentials = json.loads(os.getenv("FIREBASE_CREDENTIALS_JSON"))
+        cred = credentials.Certificate(firebase_credentials)
+        initialize_app(cred)
+    return firestore.client()
