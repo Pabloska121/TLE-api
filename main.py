@@ -19,9 +19,22 @@ async def load_data():
 def root():
     return {"message": "API de TLE en funcionamiento 🚀"}
 
-@app.get("/satellites")
-def get_satellite_list():
-    return [{"name": sat["name"], "id": sat["id"]} for sat in tle_data]
+@app.get("/tle/{object_name}")
+async def get_tle_by_name(object_name: str):
+    try:
+        # Buscar documentos en la colección "tles" donde OBJECT_NAME coincida
+        query = db.collection("tles").where("OBJECT_NAME", "==", object_name).limit(1)
+        results = query.stream()
+        
+        for doc in results:
+            tle_data = doc.to_dict()
+            return {"id": doc.id, "data": tle_data}
+
+        # Si no se encontró nada
+        raise HTTPException(status_code=404, detail="TLE no encontrado")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error buscando el TLE: {e}")
 
 @app.get("/tle/{id}")
 def get_tle_by_id(id: str):
