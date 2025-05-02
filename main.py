@@ -14,7 +14,7 @@ async def startup_event():
 def root():
     return {"message": "API de TLE en funcionamiento 🚀"}
 
-@app.get("/tle/{object_name}")
+@app.get("/tle-name/{object_name}")
 async def get_tle_by_name(object_name: str):
     try:
         # Buscar en todas las colecciones (por ejemplo, "stations", "visual", "active")
@@ -36,20 +36,31 @@ async def get_tle_by_name(object_name: str):
 async def get_tle_by_id(id: str):
     try:
         collections = ["stations", "visual", "active"]
+        
+        # Lista para almacenar los resultados
+        all_tles = []
 
+        # Iterar sobre las colecciones para obtener los satélites
         for col in collections:
             # Obtener todos los documentos de la colección
             docs = db.collection(col).stream()
 
-            # Iterar sobre los documentos de satélites dentro de cada colección
+            # Agregar todos los documentos a la lista all_tles
             for doc in docs:
                 tle_data = doc.to_dict()
+                tle_data["id"] = doc.id  # Guardamos el ID del documento
 
-                # Verificar si el campo OBJECT_CAT_ID existe y coincide con el id proporcionado
-                if "OBJECT_CAT_ID" in tle_data and tle_data["OBJECT_CAT_ID"] == id:
-                    return {"id": doc.id, "collection": col, "data": tle_data}
+                # Agregar a la lista de TLEs
+                all_tles.append(tle_data)
 
-        # Si no se encuentra ningún TLE con el OBJECT_CAT_ID
+        # Filtrar los TLEs por OBJECT_CAT_ID
+        matched_tle = list(filter(lambda x: x.get("OBJECT_CAT_ID") == id, all_tles))
+
+        # Si encontramos algún TLE, devolver el primero
+        if matched_tle:
+            return matched_tle[0]  # Devuelve el primer resultado
+
+        # Si no se encuentra ningún TLE con el id proporcionado
         raise HTTPException(status_code=404, detail="TLE no encontrado con ese OBJECT_CAT_ID")
     
     except Exception as e:
