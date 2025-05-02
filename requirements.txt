@@ -1,4 +1,5 @@
 fastapi
 uvicorn
 httpx
-gitpython
+google-cloud-firestore
+google-auth
