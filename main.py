@@ -15,6 +15,10 @@ def load_data():
     with open(DATA_FILE, "r") as f:
         tle_data = json.load(f)
 
+@app.get("/")
+def root():
+    return {"message": "API de TLE en funcionamiento 🚀"}
+
 @app.get("/satellites")
 def get_satellite_list():
     return [{"name": sat["name"], "id": sat["id"]} for sat in tle_data]
