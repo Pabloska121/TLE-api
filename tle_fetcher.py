@@ -24,7 +24,10 @@ async def download_tles():
                 group_file = DATA_DIR / f"{group}.json"
                 with open(group_file, "w") as f:
                     json.dump(tles, f)
-
+                
+                # Punto de control para verificar si el archivo se ha guardado correctamente
+                print(f"Archivos guardados en: {group_file}")
+                
                 # Mensaje de éxito
                 print(f"✅ Grupo {group} descargado y guardado en {group_file} ({len(tles)} satélites)")
 
