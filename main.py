@@ -32,17 +32,28 @@ async def get_tle_by_name(object_name: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error buscando el TLE: {e}")
 
-@app.get("/tle-id/{collection}/{id}")
-def get_tle_by_id(collection: str, id: str):
+@app.get("/tle/{id}")
+async def get_tle_by_id(id: str):
     try:
-        doc_ref = db.collection(collection).document(id)
-        doc = doc_ref.get()
-        if doc.exists:
-            return {"id": doc.id, "collection": collection, "data": doc.to_dict()}
-        else:
-            raise HTTPException(status_code=404, detail="Documento no encontrado")
+        collections = ["stations", "visual", "active"]
+
+        for col in collections:
+            # Obtener todos los documentos de la colección
+            docs = db.collection(col).stream()
+
+            # Iterar sobre los documentos de satélites dentro de cada colección
+            for doc in docs:
+                tle_data = doc.to_dict()
+
+                # Verificar si el campo OBJECT_CAT_ID existe y coincide con el id proporcionado
+                if "OBJECT_CAT_ID" in tle_data and tle_data["OBJECT_CAT_ID"] == id:
+                    return {"id": doc.id, "collection": col, "data": tle_data}
+
+        # Si no se encuentra ningún TLE con el OBJECT_CAT_ID
+        raise HTTPException(status_code=404, detail="TLE no encontrado con ese OBJECT_CAT_ID")
+    
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error buscando el documento: {e}")
+        raise HTTPException(status_code=500, detail=f"Error buscando el TLE: {e}")
 
 @app.post("/update-tles")
 async def update_tles():
