@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import json
-from tle_fetcher import download_tles
+from tle_fetcher import download_tles  # Importamos la función asincrónica desde tle_fetcher
 from pathlib import Path
 
 app = FastAPI()
@@ -8,9 +8,9 @@ DATA_FILE = Path("tle_data.json")
 
 # Cargar datos al iniciar
 @app.on_event("startup")
-def load_data():
+async def load_data():
     if not DATA_FILE.exists():
-        download_tles()
+        await download_tles()  # Llamamos a la función asincrónica para descargar los TLEs
     global tle_data
     with open(DATA_FILE, "r") as f:
         tle_data = json.load(f)
@@ -31,6 +31,6 @@ def get_tle_by_id(id: str):
     return {"error": "Satélite no encontrado"}
 
 @app.post("/update-tles")
-def update_tles():
-    download_tles()
+async def update_tles():
+    await download_tles()  # Usamos la versión asincrónica de download_tles
     return {"status": "TLEs actualizados"}
