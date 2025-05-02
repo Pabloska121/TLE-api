@@ -1,9 +1,10 @@
-import firebase_admin
-from firebase_admin import credentials, firestore
+import os
+import json
+from firebase_admin import credentials, initialize_app
 
-# Ruta a tu archivo de credenciales
-cred = credentials.Certificate("/Users/pabloasensfuentes/Downloads/tle-storage-firebase-adminsdk-fbsvc-3330726f25.json")
-firebase_admin.initialize_app(cred)
+# Obtener las credenciales de Firebase desde la variable de entorno
+firebase_credentials = json.loads(os.getenv("FIREBASE_CREDENTIALS_JSON"))
 
-# Inicializar Firestore
-db = firestore.client()
+# Crear las credenciales de Firebase a partir de las variables de entorno
+cred = credentials.Certificate(firebase_credentials)
+initialize_app(cred)
